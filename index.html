@@ -1,0 +1,261 @@
+```html
+<!DOCTYPE html>
+<html lang="hi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Maa Voice - 15 Sec Short</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .video {
+            position: relative;
+            width: min(100vw, 420px);
+            aspect-ratio: 9 / 16;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .scene {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transform: scale(1.08);
+            transition: opacity 0.7s ease, transform 3s ease;
+        }
+
+        .scene.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .scene img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(to bottom,
+                    rgba(0, 0, 0, .35),
+                    transparent 35%,
+                    rgba(0, 0, 0, .7));
+        }
+
+        .text {
+            position: absolute;
+            left: 20px;
+            right: 20px;
+            bottom: 90px;
+            text-align: center;
+            font-size: 23px;
+            font-weight: bold;
+            line-height: 1.4;
+            text-shadow: 0 3px 10px #000;
+        }
+
+        .rain {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                repeating-linear-gradient(110deg,
+                    transparent 0px,
+                    transparent 7px,
+                    rgba(255, 255, 255, .18) 8px,
+                    transparent 9px);
+            background-size: 35px 35px;
+            animation: rain .35s linear infinite;
+        }
+
+        @keyframes rain {
+            from {
+                background-position: 0 0;
+            }
+
+            to {
+                background-position: -20px 40px;
+            }
+        }
+
+        .fade {
+            position: absolute;
+            inset: 0;
+            background: #000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .8s;
+        }
+
+        .fade.show {
+            opacity: 1;
+        }
+
+        .start {
+            position: absolute;
+            z-index: 20;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            padding: 14px 25px;
+            border: none;
+            border-radius: 30px;
+            background: white;
+            color: black;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="video">
+
+        <!-- SCENE 1 -->
+        <div class="scene active" data-time="0">
+            <img src="scene1.jpg">
+            <div class="overlay"></div>
+            <div class="text">
+                उसके पास माँ की सिर्फ एक फोटो बची थी…
+            </div>
+        </div>
+
+        <!-- SCENE 2 -->
+        <div class="scene" data-time="3">
+            <img src="scene2.jpg">
+            <div class="overlay"></div>
+            <div class="text">
+                उसने AI में फोटो डाल दी…
+            </div>
+        </div>
+
+        <!-- SCENE 3 -->
+        <div class="scene" data-time="6">
+            <img src="scene3.jpg">
+            <div class="overlay"></div>
+            <div class="text">
+                “बेटा… खाना खा लिया?”
+            </div>
+        </div>
+
+        <!-- SCENE 4 -->
+        <div class="scene" data-time="9">
+            <img src="scene4.jpg">
+            <div class="overlay"></div>
+            <div class="text">
+                “माँ… आप?”
+            </div>
+        </div>
+
+        <!-- SCENE 5 -->
+        <div class="scene" data-time="12">
+            <img src="scene5.jpg">
+            <div class="overlay"></div>
+            <div class="text">
+                “मैं नहीं बेटा… बस तुम्हारी याद हूँ।”
+            </div>
+        </div>
+
+        <div class="rain"></div>
+        <div class="fade"></div>
+
+        <button class="start" onclick="startVideo()">
+            ▶ START VIDEO
+        </button>
+
+    </div>
+
+    <!-- OPTIONAL AUDIO -->
+    <audio id="music" src="music.mp3"></audio>
+
+    <script>
+
+        const scenes = document.querySelectorAll(".scene");
+        const button = document.querySelector(".start");
+        const fade = document.querySelector(".fade");
+        const music = document.getElementById("music");
+
+        function startVideo() {
+
+            button.style.display = "none";
+
+            // Start background music
+            music.currentTime = 0;
+            music.play().catch(() => { });
+
+            const startTime = Date.now();
+
+            function animate() {
+
+                const elapsed = (Date.now() - startTime) / 1000;
+
+                scenes.forEach(scene => {
+
+                    const sceneStart = Number(scene.dataset.time);
+
+                    const sceneEnd = sceneStart + 3;
+
+                    if (elapsed >= sceneStart && elapsed < sceneEnd) {
+                        scene.classList.add("active");
+                    } else {
+                        scene.classList.remove("active");
+                    }
+
+                });
+
+                // End after 15 seconds
+                if (elapsed >= 15) {
+
+                    fade.classList.add("show");
+
+                    setTimeout(() => {
+
+                        fade.classList.remove("show");
+
+                        scenes.forEach(s => {
+                            s.classList.remove("active");
+                        });
+
+                        scenes[0].classList.add("active");
+
+                        music.pause();
+
+                        button.style.display = "block";
+
+                    }, 800);
+
+                    return;
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+    </script>
+
+</body>
+
+</html>
+```
